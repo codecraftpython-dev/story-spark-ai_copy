@@ -15,9 +15,11 @@ const globalErrorHandler: ErrorRequestHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  config.env === "development"
-    ? console.log("Global Error Handler", err)
-    : console.error("Global Error Handler", err);
+  if (config.env === "development") {
+    console.log("Global Error Handler:", err instanceof Error ? err.message : "Unknown error");
+  } else {
+    console.error("Global Error Handler:", err instanceof Error ? err.message : "Unknown error");
+  }
 
   let statusCode = 500;
   let message = "Something went wrong!";

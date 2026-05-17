@@ -159,6 +159,13 @@ const StoriesComponent = () => {
                     value={textareaValue}
                     onChange={(e) => setTextareaValue(e.target.value)}
                   ></textarea>
+                  <p className="text-xs text-gray-500 mt-1 px-1">
+  💡 <span className="font-medium">Keyboard tip:</span> Press{" "}
+  <kbd className="px-1 py-0.5 text-xs bg-gray-700 rounded border border-gray-600">Tab</kbd>{" "}
+  to navigate fields and{" "}
+  <kbd className="px-1 py-0.5 text-xs bg-gray-700 rounded border border-gray-600">Enter</kbd>{" "}
+  to generate your story.
+</p>
                   <div className="flex justify-end mt-2 w-full">
                     <button
                       type="submit"

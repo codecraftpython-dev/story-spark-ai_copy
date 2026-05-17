@@ -1,39 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import GenreCard from './genre_card.component';
 import NavListComponent from '../hero/nav_list.component';
-import NotificationComponent from '../notification/notification.component';
-import { NotificationResponse } from '../../models/notification';
-import { socketIo } from '../../socket/socket.oi';
 import { isLoggedIn } from '../../services/auth.service';
 import { genres, featuredWriters, resources, stats } from './community.data';
 
 const CommunityComponent: React.FC = () => {
-  const [showNotification, setShowNotification] = useState<boolean>(false);
-  const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
   const isLogin = isLoggedIn();
-  const MAX_NOTIFICATIONS = 100;
-
-  useEffect(() => {
-    socketIo.on("pushNotification", (data: NotificationResponse) => {
-      setNotifications((prev) => {
-        const next = [...prev, data];
-        return next.length > MAX_NOTIFICATIONS 
-          ? next.slice(next.length - MAX_NOTIFICATIONS) 
-          : next;
-      });
-    });
-    return () => {
-      socketIo.off("pushNotification");
-    };
-  }, []);
 
   return (
     <div className="gradient-bg min-h-screen text-white">
-      <NavListComponent
-        setShowNotification={setShowNotification}
-        newNotify={notifications.length}
-      />
+      <NavListComponent />
       
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 overflow-hidden">
@@ -71,14 +48,6 @@ const CommunityComponent: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {showNotification && (
-        <NotificationComponent
-          notifications={notifications}
-          showNotification={showNotification}
-          setShowNotification={setShowNotification}
-        />
-      )}
 
       {/* Genre Grid Section */}
       <section className="max-w-7xl mx-auto px-6 py-20">

@@ -27,6 +27,11 @@ interface Reaction {
   _id: string;
 }
 
+interface Bookmark {
+  _id?: string;
+  email: string;
+}
+
 export interface Post {
   _id: string;
   title: string;
@@ -45,6 +50,7 @@ export interface Post {
   attachments: string[];
   comments: Comment[];
   reactions: Reaction[];
+  bookmarks?: Bookmark[];
   createdAt: string;
   updatedAt: string;
 }

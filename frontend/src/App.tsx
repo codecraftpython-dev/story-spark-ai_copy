@@ -20,6 +20,7 @@ import UserComponent from "./components/dashboard/users/user.component";
 import PricingComponent from "./components/pricing/pricing.component";
 import ExploreComponent from "./components/post/post.component";
 import PostDetailsComponent from "./components/post/post.details.component";
+import BookmarksComponent from "./components/post/bookmarks.component";
 import { getUserInfo } from "./services/auth.service";
 import UserListComponent from "./components/dashboard/users/user.list.component";
 import NotFoundComponent from "./components/not-found.component";
@@ -27,9 +28,14 @@ import EmailValidationComponent from "./components/email_validation/email.valida
 import { USER_ROLE } from "./constants/role";
 import PostListsComponent from "./components/dashboard/posts/post_lists.component";
 import ProfileComponent from "./components/dashboard/profile/profile.component";
+import AboutUsComponent from "./components/footer/about-us.tsx";
+import CareerComponent from "./components/footer/career.tsx";
+import ContactUsComponent from "./components/footer/contact-us.tsx";
+import BlogComponent from "./components/footer/blog.tsx";
+import HelpCenterComponent from "./components/footer/help-center.tsx";
+import GuidelinesComponent from "./components/footer/guidelines.tsx";
 import TemplatesComponent from "./components/templates/templates.component";
 import CommunityComponent from "./components/community/community.component";
-
 const ProtectedRoute = ({
   element,
   allowedRoles,
@@ -84,14 +90,6 @@ function App() {
             <RootLayout>
               <HeroSectionComponent />
               <HomeComponent />
-            </RootLayout>
-          }
-        />
-        <Route
-          path="/templates"
-          element={
-            <RootLayout>
-              <TemplatesComponent />
             </RootLayout>
           }
         />
@@ -214,6 +212,24 @@ function App() {
         <Route path="/pricing" element={<PricingComponent />} />
         <Route path="/explore" element={<ExploreComponent />} />
         <Route
+          path="/bookmarks"
+          element={
+            <ProtectedRoute
+              element={
+                <RootLayout>
+                  <BookmarksComponent />
+                </RootLayout>
+              }
+              allowedRoles={[
+                USER_ROLE.USER,
+                USER_ROLE.WRITER,
+                USER_ROLE.ADMIN,
+                USER_ROLE.SUPER_ADMIN,
+              ]}
+            />
+          }
+        />
+        <Route
           path="/community"
           element={
             <RootLayout>
@@ -222,6 +238,13 @@ function App() {
           }
         />
         <Route path="/post/:id" element={<PostDetailsComponent />} />
+        <Route path="/about-us" element={<AboutUsComponent />} />
+        <Route path="/career" element={<CareerComponent />} />
+        <Route path="/contact-us" element={<ContactUsComponent />} />
+        <Route path="/blog" element={<BlogComponent />} />
+        <Route path="/help-center" element={<HelpCenterComponent />} />
+        <Route path="/guidelines" element={<GuidelinesComponent />} />
+        <Route path="/community" element={<CommunityComponent />} />
         <Route path="*" element={<NotFoundComponent />} />
       </Routes>
 

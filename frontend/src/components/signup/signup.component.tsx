@@ -161,6 +161,11 @@ const SignUpComponent = () => {
                 icon="fas fa-key"
                 register={register}
               />
+              {window.location.hostname === "localhost" && serverOtp && (
+                <div id="dev-otp-display" className="text-xs text-indigo-300 mt-1 text-center bg-indigo-500/10 py-1 rounded border border-indigo-500/20">
+                  Development OTP: <span className="font-mono font-bold select-all">{serverOtp}</span>
+                </div>
+              )}
               <SSButton
                 text="Verify OTP"
                 type="button"

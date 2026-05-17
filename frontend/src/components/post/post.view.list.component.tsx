@@ -6,6 +6,8 @@ import { useToggleReactionMutation } from "../../redux/apis/reaction.api";
 import { toast } from "react-hot-toast";
 import { getUserInfo } from "../../services/auth.service";
 
+import BookmarkButton from "../BookmarkButton";
+
 interface IExploreViewListComponentProps {
   posts: Post[];
   isLoading: boolean;
@@ -58,22 +60,20 @@ const ExploreViewListComponent: React.FC<IExploreViewListComponentProps> = ({
                 <div className="flex items-center text-sm text-gray-500">
                   <button 
                     onClick={(e) => handleLike(e, story._id as string)}
-                    className={`!rounded-button hover:text-gray-400 border px-3 py-1 cursor-pointer transition-colors ${
+                    className={`!rounded-button flex items-center space-x-1 hover:text-gray-400 border px-3 py-1 cursor-pointer transition-colors ${
                       story.reactions?.some((r: any) => r.userId?.email === currentUser?.email)
                         ? "text-red-500 border-red-500/50 bg-red-500/10 hover:text-red-400"
                         : ""
                     }`}
                   >
-                    <i className={`${story.reactions?.some((r: any) => r.userId?.email === currentUser?.email) ? 'fas' : 'far'} fa-heart mr-1`}></i>{" "}
-                    <span>{story.likesCount}</span>
+                    <i className={`${story.reactions?.some((r: any) => r.userId?.email === currentUser?.email) ? 'fas' : 'far'} fa-heart`}></i>
+                    <span>{story.likesCount || 0}</span>
                   </button>
-                  <button className="ml-2 !rounded-button hover:text-gray-400 border px-3 py-1">
-                    <i className="far fa-comment mr-1"></i>{" "}
-                    <span>{story.commentsCount}</span>
+                  <button className="ml-2 !rounded-button flex items-center space-x-1 cursor-pointer hover:text-gray-400 border px-3 py-1">
+                    <i className="far fa-comment"></i>
+                    <span>{story.commentsCount || 0}</span>
                   </button>
-                  <button className="ml-auto !rounded-button hover:text-gray-400 border px-3 py-1">
-                    <i className="far fa-bookmark"></i>
-                  </button>
+                  <BookmarkButton storyId={story._id as string} bookmarks={story.bookmarks} className="ml-auto" />
                 </div>
               </div>
             </div>

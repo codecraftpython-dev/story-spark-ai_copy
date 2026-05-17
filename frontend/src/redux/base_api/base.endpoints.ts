@@ -7,3 +7,5 @@ export const POST_URL = "post";
 export const COMMENT_URL = "comment";
 export const ANALYSIS_URL = "analysis";
 export const REACTION_URL = "reaction";
+export const NOTIFICATION_URL = "notifications";
+export const BOOKMARK_URL = "bookmarks";

@@ -11,9 +11,12 @@ const handle_zod_error_1 = __importDefault(require("../../errors/handle_zod_erro
 const handle_duplicate_error_1 = __importDefault(require("../../errors/handle_duplicate_error"));
 const api_error_1 = __importDefault(require("../../errors/api_error"));
 const globalErrorHandler = (err, req, res, next) => {
-    config_1.default.env === "development"
-        ? console.log("Global Error Handler", err)
-        : console.error("Global Error Handler", err);
+    if (config_1.default.env === "development") {
+        console.log("Global Error Handler:", err instanceof Error ? err.message : "Unknown error");
+    }
+    else {
+        console.error("Global Error Handler:", err instanceof Error ? err.message : "Unknown error");
+    }
     let statusCode = 500;
     let message = "Something went wrong!";
     let errorMessage = [];

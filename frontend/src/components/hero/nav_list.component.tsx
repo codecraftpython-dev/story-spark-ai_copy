@@ -1,22 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { isLoggedIn, removeUserInfo, getUserInfo } from "../../services/auth.service";
 import { Link } from "react-router-dom";
+import { USER_ROLE } from "../../constants/role";
 import logo from "../../assets/logoNew.png";
+import NotificationComponent from "../notification/notification.component";
+import { useNotifications } from "../../hooks/useNotifications";
 
-interface INavListComponentProps {
-  setShowNotification: (value: boolean) => void;
-  newNotify: number;
-}
-
-const NavListComponent: React.FC<INavListComponentProps> = ({
-  setShowNotification,
-  newNotify,
-}) => {
+const NavListComponent: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [isLogin, setIsLogin] = useState<boolean>(isLoggedIn());
+  const notificationMenuRef = useRef<HTMLDivElement | null>(null);
+  const {
+    notifications,
+    unreadCount,
+    isOpen,
+    toggle,
+    close,
+    markAsRead,
+  } = useNotifications();
 
   const user = getUserInfo();
-  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
+  const isAdmin = user?.role === USER_ROLE.ADMIN || user?.role === USER_ROLE.SUPER_ADMIN;
 
   const handelLogout = () => {
     removeUserInfo();
@@ -26,6 +30,24 @@ const NavListComponent: React.FC<INavListComponentProps> = ({
   useEffect(() => {
     setIsLogin(isLoggedIn());
   }, []);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("[data-notification-trigger='true']")) {
+        return;
+      }
+      if (
+        notificationMenuRef.current &&
+        !notificationMenuRef.current.contains(event.target as Node)
+      ) {
+        close();
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [close]);
 
   return (
     <div className="relative z-10 mx-auto max-w-8xl px-5 py-4">
@@ -38,8 +60,13 @@ const NavListComponent: React.FC<INavListComponentProps> = ({
             <Link to="/" className="text-gray-400 hover:text-custom transition">HOME</Link>
             <Link to="/explore" className="text-gray-400 hover:text-custom transition">EXPLORE</Link>
             <Link to="/community" className="text-gray-400 hover:text-custom transition">COMMUNITY</Link>
-            {isLogin && isAdmin && (
-              <Link to="/dashboard" className="text-gray-400 hover:text-custom transition">DASHBOARD</Link>
+            {isLogin && (
+              <>
+                <Link to="/bookmarks" className="text-gray-400 hover:text-custom transition">SAVED STORIES</Link>
+                {isAdmin && (
+                  <Link to="/dashboard" className="text-gray-400 hover:text-custom transition">DASHBOARD</Link>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -49,14 +76,20 @@ const NavListComponent: React.FC<INavListComponentProps> = ({
             <button type="button" className="p-2 text-gray-400 hover:text-gray-500">
               <i className="fas fa-search"></i>
             </button>
-            <div className="relative inline-flex">
-              <button type="button" className="p-1 text-gray-400 hover:text-gray-500"
-                onClick={() => setShowNotification(true)}>
+            <div className="relative inline-flex" ref={notificationMenuRef}>
+              <button
+                type="button"
+                className="relative rounded-full p-2 text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+                data-notification-trigger="true"
+                onClick={toggle}
+              >
                 <i className="fa-solid fa-bell"></i>
+                {unreadCount > 0 && (
+                  <span className="absolute right-0 top-0 grid min-h-[18px] min-w-[18px] -translate-y-1/2 translate-x-1/2 place-items-center rounded-full bg-rose-500 px-1 text-[11px] font-semibold text-white">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
               </button>
-              <span className="absolute top-0.5 right-0.5 grid min-h-[18px] min-w-[18px] translate-x-2/4 -translate-y-2/4 place-items-center rounded-full bg-red-700 text-xs text-gray-400">
-                {newNotify}
-              </span>
             </div>
             {isLogin ? (
               <button onClick={handelLogout} className="text-gray-400 px-6 py-2 font-medium cursor-pointer">
@@ -78,28 +111,42 @@ const NavListComponent: React.FC<INavListComponentProps> = ({
         </div>
       </div>
 
+      <NotificationComponent
+        notifications={notifications}
+        showNotification={isOpen}
+        setShowNotification={close}
+        unreadCount={unreadCount}
+        onMarkAsRead={markAsRead}
+      />
+
       {menuOpen && (
         <div className="md:hidden px-5 pb-4 flex flex-col gap-3 border-t border-white/10 mt-2">
           <Link to="/" className="text-gray-400 hover:text-white py-2">HOME</Link>
           <Link to="/explore" className="text-gray-400 hover:text-white py-2">EXPLORE</Link>
           <Link to="/community" className="text-gray-400 hover:text-white py-2">COMMUNITY</Link>
-          {isLogin && isAdmin && (
-            <Link to="/dashboard" className="text-gray-400 hover:text-white py-2">DASHBOARD</Link>
+          {isLogin && (
+            <>
+              <Link to="/bookmarks" className="text-gray-400 hover:text-white py-2">SAVED STORIES</Link>
+              {isAdmin && (
+                <Link to="/dashboard" className="text-gray-400 hover:text-white py-2">DASHBOARD</Link>
+              )}
+            </>
           )}
-          <button type="button" className="text-left text-gray-400 py-2"
-            onClick={() => setShowNotification(true)}>
-            NOTIFICATIONS {newNotify > 0 && `(${newNotify})`}
+          <button type="button" className="text-left text-gray-400 py-2" data-notification-trigger="true" onClick={toggle}>
+            NOTIFICATIONS {unreadCount > 0 && `(${unreadCount})`}
           </button>
-          {isLogin ? (
-            <button onClick={handelLogout} className="text-left text-gray-400 py-2">
-              LOGOUT
-            </button>
-          ) : (
-            <Link to="/login" className="text-gray-400 py-2">LOGIN</Link>
-          )}
-        </div>
+          {
+            isLogin ? (
+              <button onClick={handelLogout} className="text-left text-gray-400 py-2">
+                LOGOUT
+              </button>
+            ) : (
+              <Link to="/login" className="text-gray-400 py-2">LOGIN</Link>
+            )
+          }
+        </div >
       )}
-    </div>
+    </div >
   );
 };
 
