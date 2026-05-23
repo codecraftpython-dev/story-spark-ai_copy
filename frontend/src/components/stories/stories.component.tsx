@@ -295,8 +295,14 @@ const handleClearPrompt = () => {
         placeholder="Every great story begins with a single idea. What's yours?"
         value={textareaValue}
         maxLength={MAX_PROMPT_LENGTH}
-        onChange={(e) => setTextareaValue(e.target.value)}
-      />
+onChange={(e) => setTextareaValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            const form = e.currentTarget.closest("form");
+            if (form) form.requestSubmit();
+          }
+        }}      />
 
       {textareaValue.length > 0 && (
         <button
@@ -351,11 +357,15 @@ const handleClearPrompt = () => {
     </div>
 
     <p className="text-xs text-gray-500 mt-1 px-1">
-      💡 <span className="font-medium">Keyboard tip:</span> Press{" "}
+      💡  <span className="font-medium">Keyboard tip:</span> Press{" "}
       <kbd className="px-1 py-0.5 text-xs bg-gray-700 rounded border border-gray-600">
-        Ctrl + Enter
+        Enter
       </kbd>{" "}
-      to generate story
+      to generate &bull;{" "}
+      <kbd className="px-1 py-0.5 text-xs bg-gray-700 rounded border border-gray-600">
+        Shift + Enter
+      </kbd>{" "}
+      for new line
     </p>
 
     <div className="flex justify-end mt-2 w-full">

@@ -43,19 +43,19 @@ const useKeyboardShortcuts = ({
         return;
       }
 
+      if (e.ctrlKey && e.key === "Enter") {
+        console.log("GENERATE");
+        e.preventDefault();
+        onGenerate();
+        return;
+      }
+
       if (isTyping) return;
 
       if (e.key === "/") {
         console.log("FOCUS");
         e.preventDefault();
         focusPrompt();
-        return;
-      }
-
-      if (e.ctrlKey && e.key === "Enter") {
-        console.log("GENERATE");
-        e.preventDefault();
-        onGenerate();
         return;
       }
 
