@@ -398,21 +398,9 @@ useEffect(() => {
     return Math.max(1, Math.ceil(words / 200));
   };
 
-  // If no generation has run yet, show the beautiful fallback wizard panel
+  // If no generation has run yet, don't render the story sections at all.
   if (!selectedStory) {
-    return (
-      <div className="mt-16 px-4 sm:px-6 lg:px-8 pb-16 flex justify-center w-full">
-        <div className="rounded-2xl border border-slate-700 bg-slate-800/40 p-8 sm:p-12 text-center text-slate-400 max-w-2xl w-full shadow-lg transition-all duration-500 mx-auto">
-          <div className="text-5xl mb-6 animate-pulse">✨</div>
-          <h3 className="text-2xl font-bold text-slate-200 tracking-wide">
-            Your AI-generated story will appear here
-          </h3>
-          <p className="mt-3 text-base text-slate-400">
-            Enter a creative prompt on the left and let StorySparkAI craft something magical.
-          </p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
