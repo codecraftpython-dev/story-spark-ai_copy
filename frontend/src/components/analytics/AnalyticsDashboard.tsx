@@ -43,7 +43,6 @@ export default function AnalyticsDashboard() {
     return data.data;
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const load = async () => {
       try {
@@ -66,7 +65,7 @@ export default function AnalyticsDashboard() {
       }
     };
     load();
-  }, []);
+  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return (
     <div className="min-h-screen bg-[#0d0d14] flex items-center justify-center">
