@@ -52,6 +52,7 @@ import BranchingStory from "./components/stories/BranchingStory";
 import ReportBug from "./components/report-bug/ReportBug";
 import StoriesComponent from "./components/stories/stories.component";
 import AnalyticsPage from "./components/dashboard/analytics/analytics.page";
+import StoryWorkspace from "./components/story/StoryWorkspace";
 
 // =========================================================================
 // 1. REFACTORED PROTECTED ROUTE LAYER (Acts as a Layout Gate using <Outlet />)
@@ -97,6 +98,7 @@ const router = createBrowserRouter([
       { path: "writing-assistant", element: <WritingAssistantComponent /> },
       { path: "story-inspiration", element: <StoryInspirationWrapper /> },
       { path: "stories", element: <StoriesComponent /> },
+      { path: "story-workspace", element: <StoryWorkspace /> },
       { path: "login", element: <LoginComponent /> },
       { path: "signup", element: <SignUpComponent /> },
       { path: "forgot-password", element: <ForgotPasswordComponent /> },

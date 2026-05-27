@@ -11,6 +11,7 @@ import { ReviewRouter } from "../app/modules/review/review.router";
 import { ReactionRouter } from "../app/modules/reaction/reaction.router";
 import { ContactRoutes } from "../app/modules/contact/contact.route";
 import { StoriesRouter } from "../routes/stories";
+import storyRoutes from "../routes/story.routes";
 
 import { ReportRouter } from "../app/modules/report/report.router";
 import { NewsletterRouter } from "../app/modules/newsletter/newsletter.route";
@@ -80,6 +81,10 @@ const modules = [
   {
     path: "/stories",
     router: StoriesRouter,
+  },
+  {
+    path: "/story-continuation",
+    router: storyRoutes,
   },
   {
     path: "/contact",

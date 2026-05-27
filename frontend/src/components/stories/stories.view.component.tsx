@@ -10,6 +10,9 @@ import logo from "../../assets/logoNew.png";
 import StoryGeneratingAnimation from "../loading/story-generating-animation.component";
 import AudioPlayer, { type AudioPlayerHandle, type NarrationPlaybackState } from "../AudioPlayer";
 import { useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setStory } from "../../redux/slices/storySlice";
+import ContinueStoryButton from "../story/ContinueStoryButton";
 
 import {
   useGenerateAlternateEndingsMutation,
@@ -85,6 +88,7 @@ const StoriesViewComponent: React.FC<StoriesComponentProps> = ({
 }) => {
   const location = useLocation();
   const audioPlayerRef = useRef<AudioPlayerHandle>(null);
+  const dispatch = useDispatch();
 
   // Start with a clean state that adapts dynamically
   const [selectedStory, setSelectedStory] = useState<IStories | null>(null);
@@ -212,16 +216,32 @@ const StoriesViewComponent: React.FC<StoriesComponentProps> = ({
 
   // Sync state instantly whenever a new template is submitted or selected
   useEffect(() => {
-    if (stories && stories.length > 0) {
-      setSelectedStory(stories[0]);
-    } else {
-      setSelectedStory(null);
-    }
-    // Reset auto-save status for new story session
-    lastSavedContentRef.current = "";
-    hasSavedSessionRef.current = false;
-    savedPostIdRef.current = null;
-  }, [stories]);
+  if (stories && stories.length > 0) {
+    setSelectedStory(stories[0]);
+
+    // Save story into Redux for continuation engine
+    dispatch(
+      setStory({
+        id: stories[0].uuid,
+        title: stories[0].title,
+        chapters: [
+          {
+            id: 1,
+            title: "Chapter 1",
+            content: stories[0].content,
+            createdAt: new Date().toISOString(),
+          },
+        ],
+      })
+    );
+  } else {
+    setSelectedStory(null);
+  }
+
+  lastSavedContentRef.current = "";
+  hasSavedSessionRef.current = false;
+  savedPostIdRef.current = null;
+}, [stories, dispatch]);
 
   useEffect(() => {
     const autoSaveStory = async () => {
@@ -809,6 +829,10 @@ if (isLoading) {
                 onWordIndexChange={setNarrationWordIndex}
                 onPlaybackStateChange={setNarrationState}
               />
+            </div>
+            {/* Story Continuation Engine */}
+            <div className="mt-6">
+              <ContinueStoryButton />
             </div>
           </div>
           <div className="mt-7">
