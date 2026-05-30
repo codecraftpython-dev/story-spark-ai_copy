@@ -5,8 +5,6 @@ import StoryInspirationWrapper from "./components/StoryInspirationWrapper";
 import WritingAssistantComponent from "./components/writing-assistant/writing_assistant.component";
 import CollabHome from "./components/collab/CollabHome";
 import CollabRoom from "./components/collab/CollabRoom";
-import StoriesComponent from "./components/stories/stories.component";
-
 import HeroSectionComponent from "./components/hero/hero_section.component";
 import HomeComponent from "./components/home/home.component";
 import LoginComponent from "./components/login/login.component";
@@ -26,7 +24,6 @@ import NotFoundComponent from "./components/not-found.component";
 import EmailValidationComponent from "./components/email_validation/email.validation.component";
 import { USER_ROLE } from "./constants/role";
 import PostListsComponent from "./components/dashboard/posts/post_lists.component";
-import PublishedStoriesComponent from "./components/dashboard/posts/published_stories.component";
 import ProfileComponent from "./components/dashboard/profile/profile.component";
 import PaymentComponent from "./components/home/pricing/payment.component";
 import Contact from "./components/contactus/contactus";
@@ -47,7 +44,7 @@ import ReportBug from "./components/report-bug/ReportBug";
 import AnalyticsPage from "./components/dashboard/analytics/analytics.page";
 import StoryWorkspace from "./components/story/StoryWorkspace";
 import StoriesComponent from "./components/stories/stories.component";
-import Scrolltotopandscrolltobottom from "./components/Scrolltotopandscrolltobottom.tsx"
+
 type ProtectedRouteProps = {
   allowedRoles: string[];
   element?: React.ReactElement;
@@ -68,7 +65,6 @@ const router = createBrowserRouter([
     element: (
       <>
         <ScrollToTop />
-        <Scrolltotopandscrolltobottom/>
         <RootLayout>
           <Outlet />
         </RootLayout>
@@ -132,15 +128,6 @@ const router = createBrowserRouter([
           {
             element: <ProtectedRoute allowedRoles={[USER_ROLE.WRITER]} />,
             children: [{ path: "analytics", element: <AnalyticsPage /> }],
-          },
-          {
-            element: <ProtectedRoute allowedRoles={ALL_ROLES} />,
-            children: [
-              {
-                path: "published-stories",
-                element: <PublishedStoriesComponent />,
-              },
-            ],
           },
           {
             element: <ProtectedRoute allowedRoles={[USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.WRITER]} />,

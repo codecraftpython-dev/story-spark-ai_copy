@@ -33,12 +33,12 @@ const SSInput = <T extends FieldValues>({
 }: SSInputProps<T>) => {
   const [showPassword, setShowPassword] = useState(false);
 
-  const inputType =
-    type === "password"
-      ? showPassword
-        ? "text"
-        : "password"
-      : type;
+const inputType =
+  type === "password"
+    ? showPassword
+      ? "text"
+      : "password"
+    : type;
   return (
 
     <div className="w-full">
@@ -47,7 +47,7 @@ const SSInput = <T extends FieldValues>({
       </label>
       <div className="relative mt-2 w-full ">
         {icon && (
-          <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-500">
+          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
             <i className={icon}></i>
           </span>
         )}
@@ -65,20 +65,20 @@ className={`block w-full min-w-0 max-w-full rounded-xl border bg-white dark:bg-s
           {...register(name, validation)}
         />
         {type === "password" && (
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
-          >
-            <i className={showPassword ? "fi fi-rr-eye" : "fi fi-rr-eye-crossed"}></i>
-          </button>
-        )}
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+  >
+    <i className={showPassword ? "fi fi-rr-eye" : "fi fi-rr-eye-crossed"}></i>
+  </button>
+)}
       </div>
       {error && (
         <p className="text-red-400 text-sm mt-1">
-          {error.message}
+        {error.message}
         </p>
-      )}
+    )}
     </div>
   );
 };

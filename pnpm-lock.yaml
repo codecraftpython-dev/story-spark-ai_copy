@@ -49,7 +49,7 @@ importers:
         specifier: ^0.1.2
         version: 0.1.5
       dotenv:
-        specifier: ^16.4.7
+        specifier: ^16.6.1
         version: 16.6.1
       express:
         specifier: ^4.21.1
@@ -76,7 +76,7 @@ importers:
         specifier: ^8.0.7
         version: 8.0.8
       openai:
-        specifier: ^4.86.1
+        specifier: ^4.104.0
         version: 4.104.0(ws@8.20.1)(zod@3.25.76)
       razorpay:
         specifier: ^2.9.6
