@@ -14,6 +14,12 @@ import { postSearchFields } from "./post.constant";
 import { SortOrder } from "mongoose";
 import { GamificationService } from "../gamification/gamification.service";
 
+
+const MAX_SEARCH_TERM_LENGTH = 100;
+
+const escapeRegex = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const createPost = async (payload: IPostPayload, token: ITokenPayload) => {
   const { email, role } = token;
   const user = await User.findOne({
@@ -60,16 +66,22 @@ const getPosts = async (
     { isDeleted: { $ne: true } },
   ];
 
-  if (searchTerm) {
+ if (searchTerm) {
+  const safeSearchTerm = escapeRegex(
+    searchTerm.trim().slice(0, MAX_SEARCH_TERM_LENGTH)
+  );
+
+  if (safeSearchTerm) {
     andCondition.push({
       $or: postSearchFields.map((field) => ({
         [field]: {
-          $regex: searchTerm,
+          $regex: safeSearchTerm,
           $options: "i",
         },
       })),
     });
   }
+}
 
   if (trendingTopic) {
     andCondition.push({
