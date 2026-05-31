@@ -589,7 +589,17 @@ useEffect(() => {
     isGenerationInProgressRef.current = true;
     setLoading(true);
 
+    let timeoutId: NodeJS.Timeout | null = null;
+
     try {
+      // 60-second client-side request timeout safeguard
+      timeoutId = setTimeout(() => {
+        if (isGenerationInProgressRef.current) {
+          toast.error("Story generation timed out. Please try again.");
+          handleCancelGeneration();
+        }
+      }, 60000);
+
       const payload = {
         prompt: selectedGenre
           ? `[Genre: ${selectedGenre}] ${data.prompt}`
@@ -630,6 +640,9 @@ useEffect(() => {
         toast.error(message);
       }
     } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       activeGenerationRef.current = null;
       isGenerationInProgressRef.current = false;
       setLoading(false);
