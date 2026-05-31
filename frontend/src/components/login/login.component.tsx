@@ -197,6 +197,7 @@ const LoginComponent = () => {
               register={register}
               validation={{ required: "Email is required" }}
               error={errors.email}
+              autoComplete="off"
               />
 
             <SSInput
