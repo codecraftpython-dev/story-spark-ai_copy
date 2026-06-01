@@ -9,6 +9,8 @@ export default function CollabHome() {
   const navigate = useNavigate();
   const [joinRoomId, setJoinRoomId] = useState("");
   const [error, setError] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const user = getUserInfo();
 
   const createRoom = () => {
     if (!isLoggedIn()) {
@@ -27,16 +29,6 @@ export default function CollabHome() {
         return;
       }
 
-      // FIX: Establish connection directly to the namespace path.
-      // If your backend runs on a dynamic env value, replace the fallback string with import.meta.env.VITE_SOCKET_URL
-      const socketUrl = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
-      const collabSocket = io(`${socketUrl}/collab`, {
-        transports: ["websocket"],
-        // pass existing auth parameters if your socket initialization requires them:
-        auth: {
-          token: localStorage.getItem("AUTH_KEY") 
-        }
-      });
       const collabSocket = socket;
 
       collabSocket.emit(
@@ -100,9 +92,10 @@ export default function CollabHome() {
           {/* Create Room */}
           <button
             onClick={createRoom}
+            disabled={isCreating}
             className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 disabled:opacity-50 text-white font-semibold text-lg transition-all shadow-lg shadow-indigo-500/20"
           >
-            ✨ Create a New Story Room
+            {isCreating ? "Creating Room..." : "✨ Create a New Story Room"}
           </button>
 
           <div className="flex items-center gap-3">
