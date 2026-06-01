@@ -4,6 +4,9 @@ import toast, { Toaster } from "react-hot-toast";
 import { useCreatePostMutation, useDeletePostMutation } from "../../redux/apis/post.api";
 import { useGetProfileInfoQuery } from "../../redux/apis/user.api";
 import jsPDF from "jspdf";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from "docx";
+import { saveAs } from "file-saver";
+import JSZip from "jszip";
 import StoryWorldMap from "../story-map/StoryWorldMap";
 import BookmarkButton from "../BookmarkButton";
 import logo from "../../assets/logoNew.png";
@@ -22,6 +25,194 @@ import {
   useGenerateAlternateEndingsMutation,
   useGenerateFreeAlternateEndingsMutation,
 } from "../../redux/apis/ai.model.api";
+
+// ─── StoryCoverImage ────────────────────────────────────────────────────────
+
+const GENRE_THEMES: Record<string, { gradient: string; accent: string; icon: string }> = {
+  fantasy:    { gradient: "135deg, #667eea 0%, #764ba2 50%, #f093fb 100%", accent: "#c084fc", icon: "✦" },
+  romance:    { gradient: "135deg, #f857a6 0%, #ff5858 50%, #ffb347 100%", accent: "#fb7185", icon: "♡" },
+  horror:     { gradient: "135deg, #0f0c29 0%, #302b63 50%, #24243e 100%", accent: "#a855f7", icon: "☽" },
+  thriller:   { gradient: "135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%", accent: "#38bdf8", icon: "◈" },
+  mystery:    { gradient: "135deg, #2c3e50 0%, #3498db 50%, #2980b9 100%", accent: "#60a5fa", icon: "◎" },
+  adventure:  { gradient: "135deg, #f7971e 0%, #ffd200 50%, #21d4fd 100%", accent: "#fbbf24", icon: "⊕" },
+  scifi:      { gradient: "135deg, #0f2027 0%, #203a43 50%, #2c5364 100%", accent: "#22d3ee", icon: "◇" },
+  "sci-fi":   { gradient: "135deg, #0f2027 0%, #203a43 50%, #2c5364 100%", accent: "#22d3ee", icon: "◇" },
+  comedy:     { gradient: "135deg, #fddb92 0%, #d1fdff 50%, #f5af19 100%", accent: "#f59e0b", icon: "◉" },
+  drama:      { gradient: "135deg, #8e2de2 0%, #4a00e0 50%, #3b82f6 100%", accent: "#a78bfa", icon: "✧" },
+  historical: { gradient: "135deg, #b79891 0%, #94716b 50%, #6b4226 100%", accent: "#d4a574", icon: "⬡" },
+  default:    { gradient: "135deg, #667eea 0%, #764ba2 50%, #4facfe 100%", accent: "#a78bfa", icon: "✦" },
+};
+
+function getGenreTheme(tag?: string) {
+  const key = (tag || "default").toLowerCase().trim();
+  return GENRE_THEMES[key] ?? GENRE_THEMES.default;
+}
+
+function getInitials(title?: string): string {
+  if (!title || !title.trim()) return "?";
+  const words = title.trim().split(/\s+/);
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return words.slice(0, 2).map((w) => w[0] ?? "").join("").toUpperCase();
+}
+
+interface StoryCoverImageProps {
+  title?: string;
+  tag?: string;
+  imageUrl?: string;
+  size?: "full" | "thumb";
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+const StoryCoverImage: React.FC<StoryCoverImageProps> = ({
+  title = "",
+  tag = "default",
+  imageUrl = "",
+  size = "full",
+  className = "",
+  style = {},
+}) => {
+  const theme = getGenreTheme(tag);
+  const initials = getInitials(title);
+
+  // Fallback high-fidelity asset image link requested in issue #1246 description
+  const defaultPlaceholder = "https://images.unsplash.com/photo-11455390582262-044cdead277a?w=600&auto=format&fit=crop&q=80";
+  const finalImageSrc = imageUrl && imageUrl.trim() !== "" && !imageUrl.includes("placeholder.com") ? imageUrl : defaultPlaceholder;
+
+  if (size === "thumb") {
+    return (
+      <div
+        className={className}
+        style={{
+          width: "100%",
+          height: "100%",
+          borderRadius: "50%",
+          background: `linear-gradient(${theme.gradient})`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "1.1rem",
+          fontWeight: 700,
+          color: "#fff",
+          letterSpacing: "0.05em",
+          textShadow: "0 1px 4px rgba(0,0,0,0.4)",
+          userSelect: "none",
+          ...style,
+        }}
+      >
+        {initials}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={className}
+      style={{
+        width: "100%",
+        height: "100%",
+        minHeight: "192px",
+        position: "relative",
+        overflow: "hidden",
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.4)), url(${finalImageSrc})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        borderRadius: "inherit",
+        ...style,
+      }}
+    >
+      {/* Decorative orbs */}
+      <div style={{
+        position: "absolute", top: "-30%", right: "-15%",
+        width: "60%", height: "120%",
+        background: "rgba(255,255,255,0.08)",
+        borderRadius: "50%",
+        pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute", bottom: "-20%", left: "-10%",
+        width: "45%", height: "80%",
+        background: "rgba(0,0,0,0.12)",
+        borderRadius: "50%",
+        pointerEvents: "none",
+      }} />
+
+      {/* Accent glyph */}
+      <div style={{
+        position: "absolute", top: "12px", right: "16px",
+        fontSize: "3.5rem",
+        color: theme.accent,
+        opacity: 0.35,
+        lineHeight: 1,
+        userSelect: "none",
+        pointerEvents: "none",
+        fontWeight: 300,
+      }}>
+        {theme.icon}
+      </div>
+
+      {/* Genre pill */}
+      <div style={{
+        position: "absolute", top: "14px", left: "14px",
+        background: "rgba(0,0,0,0.4)",
+        backdropFilter: "blur(6px)",
+        color: "#fff",
+        fontSize: "0.65rem",
+        fontWeight: 700,
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        padding: "3px 10px",
+        borderRadius: "999px",
+        border: `1px solid ${theme.accent}55`,
+        userSelect: "none",
+      }}>
+        {tag}
+      </div>
+
+      {/* Large faded initials centered if background asset image fails to show up */}
+      {!imageUrl && (
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <div style={{
+            fontSize: "5rem",
+            fontWeight: 900,
+            color: "rgba(255,255,255,0.12)",
+            letterSpacing: "-0.04em",
+            lineHeight: 1,
+            userSelect: "none",
+            pointerEvents: "none",
+          }}>
+            {initials}
+          </div>
+        </div>
+      )}
+
+      {/* Title at bottom */}
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0,
+        background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)",
+        padding: "40px 14px 14px",
+      }}>
+        <p style={{
+          margin: 0,
+          color: "#fff",
+          fontSize: "0.95rem",
+          fontWeight: 700,
+          lineHeight: 1.3,
+          textShadow: "0 2px 8px rgba(0,0,0,0.8)",
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+        }}>
+          {title}
+        </p>
+      </div>
+    </div>
+  );
+};
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
@@ -535,6 +726,21 @@ const RelatedStoriesComponent: React.FC<IRelatedStoriesComponentProps> = ({
                 <button type="button" className="rounded-lg px-4 py-2 bg-fuchsia-700 text-slate-200 font-semibold cursor-pointer hover:bg-fuchsia-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => setShowRemix(true)} disabled={!selectedStory}>
                   🔀 Remix
                 </button>
+                <button type="button" className="rounded-lg px-4 py-2 bg-sky-700 text-slate-200 font-semibold cursor-pointer hover:bg-sky-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onClick={handleExportDOCX} disabled={!selectedStory}>
+                  📝 Export Word
+                </button>
+                <button type="button" className="rounded-lg px-4 py-2 bg-slate-700 text-slate-200 font-semibold cursor-pointer hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onClick={handleExportTXT} disabled={!selectedStory}>
+                  📄 Export TXT
+                </button>
+                <button type="button" className="rounded-lg px-4 py-2 bg-amber-700 text-slate-200 font-semibold cursor-pointer hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onClick={handleExportEPUB} disabled={!selectedStory}>
+                  📚 Export EPUB
+                </button>
+                <button type="button" className="rounded-lg px-4 py-2 bg-violet-700 text-slate-200 font-semibold cursor-pointer hover:bg-violet-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => setShowWorldMap(true)} disabled={!selectedStory}>
+                  🗺️ World Map
+                </button>
+                <button type="button" className="rounded-lg px-4 py-2 bg-fuchsia-700 text-slate-200 font-semibold cursor-pointer hover:bg-fuchsia-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => setShowRemix(true)} disabled={!selectedStory}>
+                  🔀 Remix
+                </button>
                 <button
                   type="button"
                   className="rounded-lg px-4 py-2 bg-violet-700 text-slate-200 font-semibold cursor-pointer hover:bg-violet-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -697,7 +903,49 @@ const RelatedStoriesComponent: React.FC<IRelatedStoriesComponentProps> = ({
                     });
                   })()
                 )}
-              </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── Right column: Preview ── */}
+        <div className="col-span-1 lg:col-span-4">
+          <div className="mb-5">
+            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-400">
+              Preview
+            </h1>
+          </div>
+          <div className="bg-slate-800/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden group">
+            <div className="relative flex flex-col rounded-lg">
+              <div className="relative m-3 overflow-hidden text-white rounded-xl" style={{ height: "192px" }}>
+                {/* ── Updated Cover Image with dynamic imageURL support ── */}
+                <StoryCoverImage
+                  title={selectedStory.title}
+                  tag={selectedStory.tag}
+                  imageUrl={selectedStory.imageURL}
+                  className="transition-transform duration-500 group-hover:scale-105"
+                  style={{ width: "100%", height: "100%", borderRadius: "0.75rem" }}
+                />
+              </div>
+
+              <div className="px-3 py-1">
+                <div className="flex justify-between items-center mb-2 w-full">
+                  <div className="flex items-center gap-2">
+                    <div className="inline-flex items-center rounded-full bg-purple-600 py-1 px-3 text-xs font-semibold text-white shadow-sm">
+                      {selectedStory.tag.toUpperCase()}
+                    </div>
+                    <div className="inline-flex items-center rounded-full bg-indigo-600 py-1 px-3 text-xs font-semibold text-white shadow-sm">
+                      🌐 {(selectedStory.language || "English").toUpperCase()}
+                    </div>
+                    <div className="inline-flex items-center rounded-full bg-slate-700 py-1 px-2.5 text-xs font-medium text-slate-300 shadow-sm gap-1">
+                      ⏱️ {calculateReadingTime(selectedStory.content)} min read
+                    </div>
+                  </div>
+                  <div><BookmarkButton storyId={selectedStory.uuid} /></div>
+                </div>
+                <h6 className="mb-1 text-gray-300 text-xl font-semibold">{selectedStory.title}</h6>
+                <p className="text-gray-400 font-light break-words text-sm sm:text-base">{getShortenedText(selectedStory.content)}</p>
+              </div>
             </div>
           </div>
         ))
