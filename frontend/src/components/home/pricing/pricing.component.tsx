@@ -60,7 +60,8 @@ const plans: Plan[] = [
       "Advanced prompt controls",
     ],
     linkTo: "/payment?plan=Pro&price=19",
-    buttonLabel: "Start 14-Day Trial",
+    buttonLabel: "Start Pro Trial",
+    highlight: true,
   },
   {
     title: "Enterprise",
